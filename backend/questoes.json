@@ -1,0 +1,44 @@
+{
+  "questoes": [
+    {
+      "id_questao": "questao1",
+      "titulo": "Questão 1",
+      "enunciado": "Crie um algoritmo que some 2+2 e exiba o resultado.",
+      "tipo_questao": "fechada",
+      "codigo_esperado": "print(2 + 2)",
+      "blocos_esperados": null
+    },
+    {
+      "id_questao": "questao2",
+      "titulo": "Questão 2",
+      "enunciado": "Crie um algoritmo que mostre se 13 é menor que 18.",
+      "tipo_questao": "fechada",
+      "codigo_esperado": "print(13 < 18)",
+      "blocos_esperados": null
+    },
+    {
+      "id_questao": "questao3",
+      "titulo": "Questão 3",
+      "enunciado": "Pense em um código que indique se uma pessoa, de acordo com a idade, pode votar ou não (considerando as leis do Brasil). Monte-o no espaço de blocos.",
+      "tipo_questao": "fechada",
+      "codigo_esperado": "idade = 18\nif idade >= 16:\n    print(True)\nelse:\n    print(False)",
+      "blocos_esperados": null
+    },
+    {
+      "id_questao": "questao4",
+      "titulo": "Questão 4",
+      "enunciado": "Crie um algoritmo que mostre os números de 1 a 10.",
+      "tipo_questao": "fechada",
+      "codigo_esperado": "for i in range(1, 11):\n    print(i)",
+      "blocos_esperados": null
+    },
+    {
+      "id_questao": "questao5",
+      "titulo": "Questão 5",
+      "enunciado": "Crie um algoritmo que calcule 21 dividido por 5.",
+      "tipo_questao": "fechada",
+      "codigo_esperado": "21 / 5",
+      "blocos_esperados": null
+    }
+  ]
+}

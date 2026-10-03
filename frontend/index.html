@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conecta Blocos</title>
+  <meta name="theme-color" content="#111111" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="imagex/png" href="./img/quebra-cabeca.ico">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Conecta Blocos</p>
+      <h3>Recrie Algoritmos de Programação Conectando Blocos!</h3>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section id="home-view" class="view">
+      <div class="section-header">
+        <div class="section-side">
+          <h2>Preencha com o seu nome</h2>
+          <button id="estatisticas-btn" class="secondary-btn" type="button">Estatísticas</button>
+        </div>
+        <input id="nome-usuario" type="text" placeholder="Digite seu nome" />
+      </div>
+      
+      <div class="section-header">
+        <h2>Selecione uma questão</h2>
+      </div>
+      <div id="lista-questoes" class="questao-list" aria-live="polite"></div>
+
+      <section class="management-panel" aria-labelledby="gerenciar-questoes-titulo">
+        <h2 id="gerenciar-questoes-titulo">Adicionar questões</h2>
+        <div class="management-actions">
+          <button id="nova-questao-btn" class="secondary-btn" type="button">
+            Criar questão no Blockly
+          </button>
+          <label class="file-label secondary-btn" for="arquivo-questoes">
+            Importar arquivo JSON
+          </label>
+          <input id="arquivo-questoes" class="hidden" type="file" accept=".json,application/json"/>
+        </div>
+        <p>O arquivo deve conter um objeto com a propriedade questoes.</p>
+        <p id="importacao-status" role="status" aria-live="polite"></p>
+      </section>
+    </section>
+
+    <button id="voltar-home-btn" class="secondary-btn hidden" type="button">
+      <img src="img\seta-esq.png" alt="Seta para esquerda. Retorna" width="25px"/>
+      Voltar para as questões
+    </button>
+
+    <section id="question-view" class="view hidden">
+      <div class="question-detalhe">
+        <!--<p class="eyebrow">Questão atual</p>-->
+        <h2 id="titulo-questao"></h2>
+        <p id="enunciado-questao"></p>
+      </div>
+
+      <div class="blockly-panel">
+        <div id="blockly-edit" aria-label="Editor Blockly"></div>
+      </div>
+
+      <div class="action-bar">
+        <button id="executar-btn" type="button">Executar</button>
+      </div>
+    </section>
+
+    <section id="create-question-view" class="view hidden">
+      <div class="question-detalhe">
+        <h2>Criar questão</h2>
+        <p>Monte no Blockly a solução que será usada como resposta esperada.</p>
+      </div>
+
+      <form id="form-nova-questao" class="authoring-panel">
+        <label for="novo-titulo-questao">Título</label>
+        <input id="novo-titulo-questao" type="text" required placeholder="ex.: Questão 6" />
+        <label for="novo-enunciado-questao">Enunciado</label>
+        <textarea id="novo-enunciado-questao" required rows="3"></textarea>
+
+        <div class="blockly-panel">
+          <div id="blockly-author" aria-label="Editor Blockly para a resposta esperada"></div>
+        </div>
+        <div class="action-bar">
+          <button id="cancelar-nova-questao-btn" class="secondary-btn" type="button">
+            Cancelar
+          </button>
+          <button id="salvar-nova-questao-btn" type="submit">Salvar questão</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="statistics-view" class="view hidden">
+      <div class="question-detalhe">
+        <p class="eyebrow">Estatísticas</p>
+        <h2 id="nome-estatisticas">Estatísticas</h2>
+      </div>
+      <div id="lista-estatisticas" class="estatistica-list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <div id="footer">
+    <img class="logo-blockly" src="img\built-with-blockly-badge-white.png" a="https://www.blockly.com"
+    alt="Acesso a biblioteca auxiliar Blockly" height="50px">
+  </div>
+
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <script src="https://unpkg.com/blockly/python_compressed.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
