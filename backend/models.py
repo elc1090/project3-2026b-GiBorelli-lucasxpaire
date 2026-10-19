@@ -41,3 +41,16 @@ class Questao(Base):
         default=lambda: datetime.now(timezone.utc),
     )
 
+class Usuario(Base):
+    __tablename__ = "usuarios"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    email: Mapped[str] = mapped_column(String, nullable=False, unique=True, index=True)
+    senha_hash: Mapped[str] = mapped_column(String, nullable=False)
+    nome: Mapped[str] = mapped_column(String, nullable=False, index=True)
+    tipo_usuario: Mapped[str] = mapped_column(String, nullable=False)
+    criado_em: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
