@@ -87,7 +87,7 @@ const importacaoStatus = $('importacao-status');
 const formNovaQuestao = $('form-nova-questao');
 const cancelarNovaQuestaoBtn = $('cancelar-nova-questao-btn');
 
-const apiUrl = 'https://conecta-blocos-giborelli.onrender.com';
+const apiUrl = 'https://project3-2026b-giborelli-lucasxpaire-production.up.railway.app';
 let questions = [];
 
 function normalizeQuestionId(title) {
