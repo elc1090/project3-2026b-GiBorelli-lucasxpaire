@@ -1,5 +1,6 @@
+from datetime import datetime
 from typing import Any, Literal
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 class TentativaCreate(BaseModel):
     nome: str = Field(min_length=1)
@@ -30,3 +31,29 @@ class QuestaoCreate(BaseModel):
 
 class QuestaoImport(BaseModel):
     questoes: list[QuestaoCreate] = Field(min_length=1)
+
+
+class UsuarioCreate(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    nome: str = Field(min_length=1)
+    email: EmailStr
+    senha: str = Field(min_length=6)
+    tipo_usuario: Literal["professor", "estudante"]
+
+
+class UsuarioLogin(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    email: EmailStr
+    senha: str = Field(min_length=1)
+
+
+class UsuarioResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    nome: str
+    email: EmailStr
+    tipo_usuario: str
+    criado_em: datetime
