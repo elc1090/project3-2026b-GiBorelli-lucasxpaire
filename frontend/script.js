@@ -108,7 +108,7 @@ const isLocalFrontend =
   localHosts.has(window.location.hostname) || window.location.protocol === 'file:';
 const apiUrl = isLocalFrontend
   ? 'http://127.0.0.1:8000'
-  : 'https://project3-2026b-giborelli-lucasxpaire-production.up.railway.app';
+  : 'https://conecta-blocos-backend.onrender.com';
 let questions = [];
 let currentUser = null;
 
