@@ -57,3 +57,9 @@ class UsuarioResponse(BaseModel):
     email: EmailStr
     tipo_usuario: str
     criado_em: datetime
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    usuario: UsuarioResponse

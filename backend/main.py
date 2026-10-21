@@ -4,14 +4,16 @@ from pathlib import Path
 import unicodedata
 from typing import Any
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from database import SessionLocal, get_db, init_db
-from models import Questao, Tentativa
-from schemas import QuestaoCreate, QuestaoImport, TentativaCreate
+from models import Questao, Tentativa, Usuario
+from schemas import QuestaoCreate, QuestaoImport, TentativaCreate, UsuarioCreate, UsuarioLogin, UsuarioResponse, TokenResponse
+from security import create_access_token, decode_access_token, generate_hash, verify_password
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
@@ -29,6 +31,29 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+security_scheme = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security_scheme), db: Session = Depends(get_db)) -> Usuario:
+    token = credentials.credentials
+    try:
+        payload = decode_access_token(token)
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido.", headers={"WWW-Authenticate": "Bearer"})
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido ou expirado.", headers={"WWW-Authenticate": "Bearer"})
+
+    user = db.scalar(select(Usuario).where(Usuario.id == int(user_id)))
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário não encontrado.", headers={"WWW-Authenticate": "Bearer"})
+    return user
+
+
+async def require_professor(current_user: Usuario = Depends(get_current_user)) -> Usuario:
+    if current_user.tipo_usuario != "professor":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito: apenas professores podem criar ou importar questões.")
+    return current_user
 
 
 def normalize_code(code: str) -> str:
@@ -230,7 +255,7 @@ async def list_questions(db: Session = Depends(get_db)):
 
 
 @app.post("/questoes")
-async def create_question(data: QuestaoCreate, db: Session = Depends(get_db)):
+async def create_question(data: QuestaoCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(require_professor)):
     question_id = normalize_question_id(data.titulo)
     if not question_id or data.id_questao != question_id:
         raise HTTPException(
@@ -257,13 +282,10 @@ async def create_question(data: QuestaoCreate, db: Session = Depends(get_db)):
 
 
 @app.post("/questoes/importar")
-async def import_questions(data: QuestaoImport, db: Session = Depends(get_db)):
+async def import_questions(data: QuestaoImport, db: Session = Depends(get_db), current_user: Usuario = Depends(require_professor)):
     ids = [question.id_questao.strip() for question in data.questoes]
     if len(ids) != len(set(ids)):
-        raise HTTPException(
-            status_code=422,
-            detail="O arquivo contém ids_questao duplicados.",
-        )
+        raise HTTPException(status_code=422, detail="O arquivo contém ids_questao duplicados.")
 
     questions = [save_question(question, db) for question in data.questoes]
     db.commit()
@@ -272,3 +294,47 @@ async def import_questions(data: QuestaoImport, db: Session = Depends(get_db)):
         "quantidade": len(questions),
         "ids_questao": [question.id_questao for question in questions],
     }
+
+
+@app.post("/auth/cadastrar", response_model=UsuarioResponse, status_code=status.HTTP_201_CREATED)
+async def register_user(data: UsuarioCreate, db: Session = Depends(get_db)):
+    existing_user = db.scalar(
+        select(Usuario).where(Usuario.email == data.email)
+    )
+    if existing_user is not None:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Esse e-mail já está em uso. Tente fazer login ou use outro e-mail.")
+
+    hashed_password = generate_hash(data.senha)
+    new_user = Usuario(nome=data.nome, email=data.email, senha_hash=hashed_password, tipo_usuario=data.tipo_usuario)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return new_user
+
+
+@app.post("/auth/login", response_model=TokenResponse)
+async def login_user(data: UsuarioLogin, db: Session = Depends(get_db)):
+    user = db.scalar(
+        select(Usuario).where(Usuario.email == data.email)
+    )
+    if user is None or not verify_password(data.senha, user.senha_hash):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="E-mail ou senha incorretos.", headers={"WWW-Authenticate": "Bearer"})
+
+    token_data = {
+        "sub": str(user.id),
+        "email": user.email,
+        "nome": user.nome,
+        "tipo_usuario": user.tipo_usuario,
+    }
+    access_token = create_access_token(token_data)
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "usuario": user,
+    }
+
+
+@app.get("/auth/me", response_model=UsuarioResponse)
+async def get_my_profile(current_user: Usuario = Depends(get_current_user)):
+    return current_user
