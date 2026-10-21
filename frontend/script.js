@@ -89,6 +89,57 @@ const cancelarNovaQuestaoBtn = $('cancelar-nova-questao-btn');
 
 const apiUrl = 'https://project3-2026b-giborelli-lucasxpaire-production.up.railway.app';
 let questions = [];
+let currentUser = null;
+
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+function setToken(token) {
+  if (token) {
+    localStorage.setItem('token', token);
+  } else {
+    localStorage.removeItem('token');
+  }
+}
+
+function getAuthHeaders() {
+  const token = getToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+async function checkSession() {
+  const token = getToken();
+  if (!token) {
+    currentUser = null;
+    return null;
+  }
+  try {
+    const response = await fetch(`${apiUrl}/auth/me`, {
+      headers: getAuthHeaders()
+    });
+    if (response.ok) {
+      currentUser = await response.json();
+    } else {
+      currentUser = null;
+      setToken(null);
+    }
+  } catch (error) {
+    console.error('Erro ao verificar sessão:', error);
+    currentUser = null;
+  }
+  return currentUser;
+}
+
+function logout() {
+  setToken(null);
+  currentUser = null;
+  showHome();
+}
 
 function normalizeQuestionId(title) {
   return title.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -306,7 +357,7 @@ async function importarQuestoesJson(event) {
     const payload = JSON.parse(await file.text());
     const response = await fetch(`${apiUrl}/questoes/importar`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
     const result = await response.json();
@@ -358,7 +409,7 @@ async function salvarNovaQuestao(event) {
   try {
     const response = await fetch(`${apiUrl}/questoes`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(payload)
     });
     const result = await response.json();
@@ -398,7 +449,7 @@ async function enviaFastAPI() {
   try {
     const resposta = await fetch(`${apiUrl}/run-blocks`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
         nome,
         id_questao: currentQuestionId,
@@ -415,5 +466,6 @@ async function enviaFastAPI() {
   }
 }
 
+checkSession();
 carregarQuestoes();
 showHome();
