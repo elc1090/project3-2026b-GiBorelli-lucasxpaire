@@ -9,29 +9,39 @@
   <link rel="icon" type="imagex/png" href="./img/quebra-cabeca.ico">
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">Conecta Blocos</p>
-      <h3>Recrie Algoritmos de Programação Conectando Blocos!</h3>
-    </div>
+  <header class="site-header">
+    <button id="inicio-btn" class="app-name" type="button">
+      <img src="img/quebra-cabeca.ico" alt="" />
+      Conecta Blocos
+    </button>
+    <nav class="header-actions" aria-label="Navegação da conta">
+      <button id="cadastro-btn" class="secondary-btn hidden" type="button">Cadastro</button>
+      <button id="login-btn" class="secondary-btn hidden" type="button">Login</button>
+      <button id="estatisticas-btn" class="secondary-btn hidden" type="button">Estatísticas</button>
+      <button id="logout-btn" class="secondary-btn hidden" type="button">Logout</button>
+    </nav>
   </header>
 
   <main class="app-shell">
-    <section id="home-view" class="view">
-      <div class="section-header">
-        <div class="section-side">
-          <h2>Preencha com o seu nome</h2>
-          <button id="estatisticas-btn" class="secondary-btn" type="button">Estatísticas</button>
+    <section id="welcome-view" class="view welcome-view">
+      <div class="welcome-content">
+        <img class="welcome-icon" src="img/quebra-cabeca.ico" alt="Ícone do Conecta Blocos" />
+        <div>
+          <!--<p class="eyebrow">Conecta Blocos</p>-->
+          <h1>Recrie Algoritmos de Programação Conectando Blocos!</h1>
+          <p>Entre ou cadastre-se para acessar as atividades.</p>
         </div>
-        <input id="nome-usuario" type="text" placeholder="Digite seu nome" />
       </div>
-      
+    </section>
+
+    <section id="home-view" class="view hidden">
       <div class="section-header">
-        <h2>Selecione uma questão</h2>
+        <p class="eyebrow" id="perfil-usuario"></p>
+        <h2 id="titulo-dashboard">Questões</h2>
       </div>
       <div id="lista-questoes" class="questao-list" aria-live="polite"></div>
 
-      <section class="management-panel" aria-labelledby="gerenciar-questoes-titulo">
+      <section id="management-panel" class="management-panel hidden" aria-labelledby="gerenciar-questoes-titulo">
         <h2 id="gerenciar-questoes-titulo">Adicionar questões</h2>
         <div class="management-actions">
           <button id="nova-questao-btn" class="secondary-btn" type="button">
@@ -47,9 +57,52 @@
       </section>
     </section>
 
+    <section id="register-view" class="view auth-view hidden">
+      <div class="question-detalhe">
+        <p class="eyebrow">Nova conta</p>
+        <h1>Cadastro</h1>
+      </div>
+      <form id="form-cadastro" class="auth-panel">
+        <label for="cadastro-nome">Nome</label>
+        <input id="cadastro-nome" name="nome" type="text" required minlength="1" autocomplete="name" />
+        <label for="cadastro-email">E-mail</label>
+        <input id="cadastro-email" name="email" type="email" required autocomplete="email" />
+        <label for="cadastro-senha">Senha (mínimo de 6 caracteres)</label>
+        <input id="cadastro-senha" name="senha" type="password" required minlength="6" autocomplete="new-password" />
+        <fieldset class="role-options">
+          <legend>Tipo de usuário</legend>
+          <label><input type="radio" name="tipo_usuario" value="estudante" required checked /> Aluno</label>
+          <label><input type="radio" name="tipo_usuario" value="professor" /> Professor</label>
+        </fieldset>
+        <p id="cadastro-status" class="form-status" role="status" aria-live="polite"></p>
+        <div class="action-bar">
+          <button class="secondary-btn" type="button" data-auth-view="welcome">Cancelar</button>
+          <button id="enviar-cadastro-btn" type="submit">Cadastrar</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="login-view" class="view auth-view hidden">
+      <div class="question-detalhe">
+        <p class="eyebrow">Acesse sua conta</p>
+        <h1>Login</h1>
+      </div>
+      <form id="form-login" class="auth-panel">
+        <label for="login-email">E-mail</label>
+        <input id="login-email" name="email" type="email" required autocomplete="email" />
+        <label for="login-senha">Senha</label>
+        <input id="login-senha" name="senha" type="password" required autocomplete="current-password" />
+        <p id="login-status" class="form-status" role="status" aria-live="polite"></p>
+        <div class="action-bar">
+          <button class="secondary-btn" type="button" data-auth-view="welcome">Cancelar</button>
+          <button id="enviar-login-btn" type="submit">Entrar</button>
+        </div>
+      </form>
+    </section>
+
     <button id="voltar-home-btn" class="secondary-btn hidden" type="button">
       <img src="img\seta-esq.png" alt="Seta para esquerda. Retorna" width="25px"/>
-      Voltar para as questões
+      Voltar
     </button>
 
     <section id="question-view" class="view hidden">

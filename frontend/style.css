@@ -71,24 +71,55 @@ textarea {
   resize: vertical;
 }
 
-.topbar {
-  max-width: 1000px;
-  margin: 1.5rem auto 1.25rem;
-  padding: 1rem 1.5rem;
+.site-header {
+  max-width: 1100px;
+  min-height: 76px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(8px);
+  gap: 1.25rem;
 }
 
-.topbar h3 {
-  margin: 0.25rem 0 0;
-  font-size: clamp(1.1rem, 2vw, 1.5rem);
+.auth-screen .site-header {
+  justify-content: flex-start;
+}
+
+.auth-screen .header-actions {
+  display: none;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.header-actions .secondary-btn {
+  margin: 0;
+  padding: 0.6rem 1rem;
+}
+
+.app-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.app-name img {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
 }
 
 .eyebrow {
@@ -106,6 +137,59 @@ textarea {
   padding: 0 0 2rem;
 }
 
+.welcome-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3.5rem 2rem;
+}
+
+.welcome-content {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.5rem, 5vw, 3.5rem);
+  max-width: 900px;
+}
+
+.welcome-icon {
+  width: clamp(6rem, 18vw, 11rem);
+  height: clamp(6rem, 18vw, 11rem);
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.welcome-content h1 {
+  max-width: 700px;
+  margin: 0;
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  line-height: 1.2;
+  text-align: left;
+}
+
+.welcome-content p {
+  margin: 0.75rem 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+  /*text-align: center;*/
+}
+
+.welcome-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.9rem 2.5rem;
+  color: #fff;
+  background: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.welcome-btn:hover {
+  transform: translateY(-2px);
+}
+
 .view {
   display: block;
 }
@@ -119,14 +203,6 @@ textarea {
 .section-header h2 {
   margin: 0;
   font-size: clamp(1.4rem, 2vw, 2rem);
-}
-
-.section-side {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  min-height: 50px;
 }
 
 .questao-list {
@@ -225,10 +301,6 @@ textarea {
   font-weight: 600;
 }
 
-#estatisticas-btn {
-  margin-bottom: 1.25rem;
-}
-
 .estatistica-list {
   display: grid;
   gap: 0.75rem;
@@ -289,6 +361,54 @@ textarea {
   overflow: hidden;
 }
 
+.auth-panel {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1.5rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.auth-panel > input {
+  width: 100%;
+  margin: 0 0 0.5rem;
+}
+
+.role-options {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.25rem 0;
+  padding: 0;
+  border: 0;
+}
+
+.role-options legend {
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+}
+
+.role-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.role-options input[type="radio"] {
+  width: auto;
+  min-height: auto;
+  margin: 0;
+  accent-color: #8ca9dc;
+}
+
+.form-status {
+  min-height: 1.5rem;
+  margin: 0;
+  color: var(--muted);
+  white-space: pre-line;
+}
+
 #blockly-author {
   width: 100%;
   height: 520px;
@@ -302,10 +422,13 @@ textarea {
   margin-top: 1rem;
   display: flex;
   justify-content: flex-end;
+  gap: 0.75rem;
 }
 
 #executar-btn,
 #salvar-nova-questao-btn,
+#enviar-cadastro-btn,
+#enviar-login-btn,
 .secondary-btn {
   border: none;
   margin-bottom: 0.5rem;
@@ -329,6 +452,16 @@ textarea {
   background: var(--accent);
 }
 
+#enviar-cadastro-btn,
+#enviar-login-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.75rem 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+}
+
 .secondary-btn {
   background: #edf1ff;
   color: var(--text);
@@ -337,8 +470,16 @@ textarea {
 
 #executar-btn:hover,
 #salvar-nova-questao-btn:hover,
+#enviar-cadastro-btn:hover,
+#enviar-login-btn:hover,
 .secondary-btn:hover {
   transform: translateY(-1px);
+}
+
+#enviar-cadastro-btn:disabled,
+#enviar-login-btn:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 .logo-blockly {
@@ -360,10 +501,34 @@ textarea {
     padding: 0 0.75rem;
   }
 
-  .topbar {
-    padding: 1rem;
+  .site-header {
+    min-height: 64px;
+    padding: 0.75rem 0;
+  }
+
+  .header-actions {
+    gap: 0.4rem;
+  }
+
+  .header-actions .secondary-btn {
+    padding: 0.55rem 0.75rem;
+  }
+
+  .app-name {
+    font-size: 1.1rem;
+  }
+
+  .welcome-view {
+    padding: 2.5rem 0.5rem;
+  }
+
+  .welcome-content {
     flex-direction: column;
-    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .welcome-content h1 {
+    text-align: center;
   }
 
   #blockly-edit {

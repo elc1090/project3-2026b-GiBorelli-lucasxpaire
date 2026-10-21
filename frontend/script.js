@@ -69,10 +69,21 @@ let currentQuestionId = null;
 const questionStates = {};
 
 const $ = (id) => document.getElementById(id);
+const cadastroBtn = $('cadastro-btn');
+const loginBtn = $('login-btn');
+const estatisticasBtn = $('estatisticas-btn');
+const logoutBtn = $('logout-btn');
+const inicioBtn = $('inicio-btn');
+const welcomeView = $('welcome-view');
 const homeView = $('home-view');
+const registerView = $('register-view');
+const loginView = $('login-view');
 const questionView = $('question-view');
 const createQuestionView = $('create-question-view');
 const statisticsView = $('statistics-view');
+const managementPanel = $('management-panel');
+const perfilUsuario = $('perfil-usuario');
+const tituloDashboard = $('titulo-dashboard');
 const listaQuestoes = $('lista-questoes');
 const listaEstatisticas = $('lista-estatisticas');
 const nomeEstatisticas = $('nome-estatisticas');
@@ -80,14 +91,24 @@ const tituloQuestao = $('titulo-questao');
 const enunciadoQuestao = $('enunciado-questao');
 const voltarHomeBtn = $('voltar-home-btn');
 const executarBtn = $('executar-btn');
-const estatisticasBtn = $('estatisticas-btn');
 const novaQuestaoBtn = $('nova-questao-btn');
 const arquivoQuestoes = $('arquivo-questoes');
 const importacaoStatus = $('importacao-status');
 const formNovaQuestao = $('form-nova-questao');
 const cancelarNovaQuestaoBtn = $('cancelar-nova-questao-btn');
+const formCadastro = $('form-cadastro');
+const formLogin = $('form-login');
+const cadastroStatus = $('cadastro-status');
+const loginStatus = $('login-status');
+const enviarCadastroBtn = $('enviar-cadastro-btn');
+const enviarLoginBtn = $('enviar-login-btn');
 
-const apiUrl = 'https://project3-2026b-giborelli-lucasxpaire-production.up.railway.app';
+const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
+const isLocalFrontend =
+  localHosts.has(window.location.hostname) || window.location.protocol === 'file:';
+const apiUrl = isLocalFrontend
+  ? 'http://127.0.0.1:8000'
+  : 'https://project3-2026b-giborelli-lucasxpaire-production.up.railway.app';
 let questions = [];
 let currentUser = null;
 
@@ -135,10 +156,41 @@ async function checkSession() {
   return currentUser;
 }
 
+function updateHeader() {
+  const isLoggedIn = Boolean(currentUser);
+  cadastroBtn.classList.toggle('hidden', isLoggedIn);
+  loginBtn.classList.toggle('hidden', isLoggedIn);
+  estatisticasBtn.classList.toggle('hidden', !isLoggedIn);
+  logoutBtn.classList.toggle('hidden', !isLoggedIn);
+  managementPanel.classList.toggle(
+    'hidden',
+    !isLoggedIn || currentUser.tipo_usuario !== 'professor'
+  );
+  if (isLoggedIn) {
+    perfilUsuario.textContent = `${currentUser.nome} · ${
+      currentUser.tipo_usuario === 'professor' ? 'Professor' : 'Aluno'
+    }`;
+    tituloDashboard.textContent = 'Questões para responder';
+  }
+}
+
+function hideViews() {
+  [
+    welcomeView,
+    homeView,
+    registerView,
+    loginView,
+    questionView,
+    createQuestionView,
+    statisticsView
+  ].forEach((view) => view.classList.add('hidden'));
+}
+
 function logout() {
   setToken(null);
   currentUser = null;
-  showHome();
+  updateHeader();
+  showWelcome();
 }
 
 function normalizeQuestionId(title) {
@@ -156,6 +208,13 @@ function getApiErrorMessage(detail, fallback) {
     return detail.map((item) => item.msg || JSON.stringify(item)).join('\n');
   }
   return fallback;
+}
+
+function getAuthApiErrorMessage(response, detail, fallback) {
+  if (response.status === 404) {
+    return `A API em ${apiUrl} não possui esta rota de autenticação. Atualize o deploy do backend ou confirme a URL da API.`;
+  }
+  return getApiErrorMessage(detail, fallback);
 }
 
 function renderQuestionList() {
@@ -214,26 +273,57 @@ function loadQuestionState(questionId) {
 }
 
 function showHome() {
+  document.body.classList.remove('auth-screen');
+  if (!currentUser) {
+    showWelcome();
+    return;
+  }
+  hideViews();
   homeView.classList.remove('hidden');
-  questionView.classList.add('hidden');
-  createQuestionView.classList.add('hidden');
-  statisticsView.classList.add('hidden');
+  voltarHomeBtn.classList.add('hidden');
+  updateHeader();
+  scrollToPageStart();
+}
+
+function showWelcome() {
+  document.body.classList.remove('auth-screen');
+  hideViews();
+  welcomeView.classList.remove('hidden');
   voltarHomeBtn.classList.add('hidden');
   scrollToPageStart();
 }
 
-function showStatistics() {
-  const nome = $('nome-usuario').value.trim();
+function showAuthView(view) {
+  document.body.classList.add('auth-screen');
+  hideViews();
+  view.classList.remove('hidden');
+  voltarHomeBtn.classList.add('hidden');
+  scrollToPageStart();
+}
 
-  if (!nome) {
-    alert('Digite seu nome antes de consultar as estatísticas.');
+function showRegister() {
+  cadastroStatus.textContent = '';
+  formCadastro.reset();
+  showAuthView(registerView);
+}
+
+function showLogin(email = '', message = '') {
+  formLogin.reset();
+  $('login-email').value = email;
+  loginStatus.textContent = message;
+  showAuthView(loginView);
+}
+
+function showStatistics() {
+  document.body.classList.remove('auth-screen');
+  if (!currentUser) {
+    showWelcome();
     return;
   }
 
+  const nome = currentUser.nome;
   saveCurrentQuestionState();
-  homeView.classList.add('hidden');
-  questionView.classList.add('hidden');
-  createQuestionView.classList.add('hidden');
+  hideViews();
   statisticsView.classList.remove('hidden');
   voltarHomeBtn.classList.remove('hidden');
   nomeEstatisticas.textContent = `Tentativas de ${nome}`;
@@ -284,6 +374,8 @@ async function carregarEstatisticas(nome) {
 }
 
 function showQuestion(questionId) {
+  document.body.classList.remove('auth-screen');
+  if (!currentUser) return;
   saveCurrentQuestionState();
   const question = questions.find((item) => item.id_questao === questionId);
 
@@ -293,10 +385,8 @@ function showQuestion(questionId) {
   tituloQuestao.textContent = question.titulo;
   enunciadoQuestao.textContent = question.enunciado;
 
-  homeView.classList.add('hidden');
+  hideViews();
   questionView.classList.remove('hidden');
-  createQuestionView.classList.add('hidden');
-  statisticsView.classList.add('hidden');
   voltarHomeBtn.classList.remove('hidden');
 
   document.querySelectorAll('.questao-card').forEach((card) => {
@@ -326,12 +416,19 @@ voltarHomeBtn.addEventListener('click', () => {
   showHome();
 });
 
+cadastroBtn.addEventListener('click', showRegister);
+loginBtn.addEventListener('click', () => showLogin());
+logoutBtn.addEventListener('click', logout);
+inicioBtn.addEventListener('click', () => {
+  if (currentUser) showHome();
+  else showWelcome();
+});
 estatisticasBtn.addEventListener('click', showStatistics);
 novaQuestaoBtn.addEventListener('click', () => {
+  if (!currentUser || currentUser.tipo_usuario !== 'professor') return;
+  document.body.classList.remove('auth-screen');
   saveCurrentQuestionState();
-  homeView.classList.add('hidden');
-  questionView.classList.add('hidden');
-  statisticsView.classList.add('hidden');
+  hideViews();
   createQuestionView.classList.remove('hidden');
   voltarHomeBtn.classList.remove('hidden');
   formNovaQuestao.reset();
@@ -343,12 +440,18 @@ novaQuestaoBtn.addEventListener('click', () => {
 
 cancelarNovaQuestaoBtn.addEventListener('click', showHome);
 
+document.querySelectorAll('[data-auth-view="welcome"]').forEach((button) => {
+  button.addEventListener('click', showWelcome);
+});
+formCadastro.addEventListener('submit', cadastrarUsuario);
+formLogin.addEventListener('submit', entrarUsuario);
 arquivoQuestoes.addEventListener('change', importarQuestoesJson);
 formNovaQuestao.addEventListener('submit', salvarNovaQuestao);
 
 executarBtn.addEventListener('click', enviaFastAPI);
 
 async function importarQuestoesJson(event) {
+  if (!currentUser || currentUser.tipo_usuario !== 'professor') return;
   const file = event.target.files[0];
   if (!file) return;
 
@@ -378,7 +481,7 @@ async function importarQuestoesJson(event) {
 
 async function salvarNovaQuestao(event) {
   event.preventDefault();
-  if (!authorWorkspace) return;
+  if (!authorWorkspace || !currentUser || currentUser.tipo_usuario !== 'professor') return;
 
   const titulo = $('novo-titulo-questao').value.trim();
   const idQuestao = normalizeQuestionId(titulo);
@@ -435,14 +538,9 @@ async function salvarNovaQuestao(event) {
 
 
 async function enviaFastAPI() {
-  if (!workspace || !currentQuestionId) return;
+  if (!workspace || !currentQuestionId || !currentUser) return;
 
-  const nome = document.getElementById('nome-usuario').value.trim();
-  if (!nome) {
-    alert('Digite seu nome antes de executar.');
-    return;
-  }
-
+  const nome = currentUser.nome;
   const code = Blockly.Python.workspaceToCode(workspace);
   const workspaceJson = Blockly.serialization.workspaces.save(workspace);
 
@@ -460,12 +558,100 @@ async function enviaFastAPI() {
     });
 
     const resultado = await resposta.json();
+    if (!resposta.ok) {
+      throw new Error(
+        getApiErrorMessage(resultado.detail, 'Não foi possível enviar a resposta.')
+      );
+    }
     alert(resultado.message);
   } catch (e) {
     console.error('Erro ao enviar os dados ao FastAPI:', e);
+    alert(`Falha ao enviar a resposta: ${e.message}`);
   }
 }
 
-checkSession();
-carregarQuestoes();
-showHome();
+async function cadastrarUsuario(event) {
+  event.preventDefault();
+  enviarCadastroBtn.disabled = true;
+  cadastroStatus.textContent = 'Cadastrando...';
+  const formData = new FormData(formCadastro);
+  const payload = {
+    nome: formData.get('nome').trim(),
+    email: formData.get('email').trim(),
+    senha: formData.get('senha'),
+    tipo_usuario: formData.get('tipo_usuario')
+  };
+
+  try {
+    const response = await fetch(`${apiUrl}/auth/cadastrar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        getAuthApiErrorMessage(
+          response,
+          result.detail,
+          'Não foi possível concluir o cadastro.'
+        )
+      );
+    }
+    showLogin(payload.email, 'Cadastro realizado. Entre com seu e-mail e senha.');
+  } catch (error) {
+    cadastroStatus.textContent = error.message;
+    console.error('Erro ao cadastrar usuário:', error);
+  } finally {
+    enviarCadastroBtn.disabled = false;
+  }
+}
+
+async function entrarUsuario(event) {
+  event.preventDefault();
+  enviarLoginBtn.disabled = true;
+  loginStatus.textContent = 'Verificando acesso...';
+  const payload = {
+    email: $('login-email').value.trim(),
+    senha: $('login-senha').value
+  };
+
+  try {
+    const response = await fetch(`${apiUrl}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        getAuthApiErrorMessage(
+          response,
+          result.detail,
+          'Não foi possível entrar.'
+        )
+      );
+    }
+    setToken(result.access_token);
+    currentUser = result.usuario;
+    updateHeader();
+    formLogin.reset();
+    showHome();
+    await carregarQuestoes();
+  } catch (error) {
+    loginStatus.textContent = error.message;
+    console.error('Erro ao fazer login:', error);
+  } finally {
+    enviarLoginBtn.disabled = false;
+  }
+}
+
+async function initializeApp() {
+  await checkSession();
+  updateHeader();
+  if (currentUser) showHome();
+  else showWelcome();
+  await carregarQuestoes();
+}
+
+initializeApp();
