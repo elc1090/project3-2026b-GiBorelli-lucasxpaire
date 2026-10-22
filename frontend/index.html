@@ -18,7 +18,7 @@
       <button id="cadastro-btn" class="secondary-btn hidden" type="button">Cadastro</button>
       <button id="login-btn" class="secondary-btn hidden" type="button">Login</button>
       <button id="estatisticas-btn" class="secondary-btn hidden" type="button">Estatísticas</button>
-      <button id="logout-btn" class="secondary-btn hidden" type="button">Logout</button>
+      <button id="logout-btn" class="secondary-btn hidden" type="button">Sair</button>
     </nav>
   </header>
 
@@ -35,25 +35,38 @@
     </section>
 
     <section id="home-view" class="view hidden">
-      <div class="section-header">
+      <section id="student-questions-section">
+        <div class="section-header">
         <p class="eyebrow" id="perfil-usuario"></p>
         <h2 id="titulo-dashboard">Questões</h2>
-      </div>
-      <div id="lista-questoes" class="questao-list" aria-live="polite"></div>
+        </div>
+        <div id="lista-questoes" class="questao-list" aria-live="polite"></div>
+      </section>
 
       <section id="management-panel" class="management-panel hidden" aria-labelledby="gerenciar-questoes-titulo">
-        <h2 id="gerenciar-questoes-titulo">Adicionar questões</h2>
-        <div class="management-actions">
-          <button id="nova-questao-btn" class="secondary-btn" type="button">
-            Criar questão no Blockly
-          </button>
-          <label class="file-label secondary-btn" for="arquivo-questoes">
-            Importar arquivo JSON
-          </label>
-          <input id="arquivo-questoes" class="hidden" type="file" accept=".json,application/json"/>
-        </div>
-        <p>O arquivo deve conter um objeto com a propriedade questoes.</p>
-        <p id="importacao-status" role="status" aria-live="polite"></p>
+        <details id="questoes-cadastradas-details" class="management-list">
+          <summary>Questões cadastradas</summary>
+          <div id="lista-questoes-professor" class="management-list-content questao-list" aria-live="polite"></div>
+        </details>
+        <details id="alunos-cadastrados-details" class="management-list">
+          <summary>Alunos cadastrados</summary>
+          <div id="lista-alunos" class="management-list-content" aria-live="polite"></div>
+        </details>
+
+        <section class="question-creation" aria-labelledby="gerenciar-questoes-titulo">
+          <h2 id="gerenciar-questoes-titulo">Adicionar questões</h2>
+          <div class="management-actions">
+            <button id="nova-questao-btn" class="secondary-btn" type="button">
+              Criar questão no Blockly
+            </button>
+            <label class="file-label secondary-btn" for="arquivo-questoes">
+              Importar arquivo JSON
+            </label>
+            <input id="arquivo-questoes" class="hidden" type="file" accept=".json,application/json"/>
+          </div>
+          <p>O arquivo deve conter um objeto com a propriedade questoes.</p>
+          <p id="importacao-status" role="status" aria-live="polite"></p>
+        </section>
       </section>
     </section>
 

@@ -21,6 +21,8 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   font-family: 'Verdana', 'Trebuchet MS', sans-serif;
   color: var(--text);
   background: linear-gradient(135deg, #eef4ff 0%, #f7f9fc 35%, #edf5f3 100%);
@@ -72,7 +74,9 @@ textarea {
 }
 
 .site-header {
+  width: 100%;
   max-width: 1100px;
+  flex: 0 0 auto;
   min-height: 76px;
   margin: 0 auto;
   padding: 1rem 1.25rem;
@@ -95,6 +99,7 @@ textarea {
   align-items: center;
   flex-wrap: wrap;
   gap: 0.5rem;
+  margin-left: auto;
 }
 
 .header-actions .secondary-btn {
@@ -132,6 +137,8 @@ textarea {
 }
 
 .app-shell {
+  flex: 1 0 auto;
+  width: 100%;
   max-width: 1000px;
   margin: 0 auto;
   padding: 0 0 2rem;
@@ -257,7 +264,71 @@ textarea {
   box-shadow: var(--shadow);
 }
 
-.management-panel h2 {
+.management-panel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.management-list {
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.management-list summary {
+  padding: 0.9rem 1rem;
+  background: #edf1ff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.management-list summary:focus-visible {
+  outline: 2px solid #8ca9dc;
+  outline-offset: -2px;
+}
+
+.management-list-content {
+  padding: 1rem;
+}
+
+.management-list-content.questao-list {
+  grid-template-columns: 1fr;
+}
+
+.management-question-item,
+.student-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.85rem 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.management-question-item h3,
+.management-question-item p {
+  margin: 0;
+}
+
+.management-question-item p,
+.student-item span {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+#lista-alunos {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.question-creation {
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.question-creation h2 {
   margin-top: 0;
 }
 
@@ -490,8 +561,10 @@ textarea {
 }
 
 #footer {
+  flex-shrink: 0;
+  width: 100%;
   max-width: 1000px;
-  margin: 0 auto;
+  margin: auto auto 0;
   padding: 0.5rem 0.5rem 1.5rem;
   border-top: 2px solid #1f2937;
 }

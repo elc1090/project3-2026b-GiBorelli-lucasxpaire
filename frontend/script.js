@@ -82,9 +82,14 @@ const questionView = $('question-view');
 const createQuestionView = $('create-question-view');
 const statisticsView = $('statistics-view');
 const managementPanel = $('management-panel');
+const studentQuestionsSection = $('student-questions-section');
 const perfilUsuario = $('perfil-usuario');
 const tituloDashboard = $('titulo-dashboard');
 const listaQuestoes = $('lista-questoes');
+const listaQuestoesProfessor = $('lista-questoes-professor');
+const listaAlunos = $('lista-alunos');
+const questoesCadastradasDetails = $('questoes-cadastradas-details');
+const alunosCadastradosDetails = $('alunos-cadastrados-details');
 const listaEstatisticas = $('lista-estatisticas');
 const nomeEstatisticas = $('nome-estatisticas');
 const tituloQuestao = $('titulo-questao');
@@ -158,19 +163,23 @@ async function checkSession() {
 
 function updateHeader() {
   const isLoggedIn = Boolean(currentUser);
+  const isProfessor = isLoggedIn && currentUser.tipo_usuario === 'professor';
   cadastroBtn.classList.toggle('hidden', isLoggedIn);
   loginBtn.classList.toggle('hidden', isLoggedIn);
-  estatisticasBtn.classList.toggle('hidden', !isLoggedIn);
-  logoutBtn.classList.toggle('hidden', !isLoggedIn);
-  managementPanel.classList.toggle(
+  estatisticasBtn.classList.toggle(
     'hidden',
-    !isLoggedIn || currentUser.tipo_usuario !== 'professor'
+    !isLoggedIn || currentUser.tipo_usuario !== 'estudante'
   );
+  logoutBtn.classList.toggle('hidden', !isLoggedIn);
+  managementPanel.classList.toggle('hidden', !isProfessor);
+  studentQuestionsSection.classList.toggle('hidden', isProfessor);
   if (isLoggedIn) {
     perfilUsuario.textContent = `${currentUser.nome} · ${
-      currentUser.tipo_usuario === 'professor' ? 'Professor' : 'Aluno'
+      isProfessor ? 'Professor' : 'Aluno'
     }`;
-    tituloDashboard.textContent = 'Questões para responder';
+    tituloDashboard.textContent = isProfessor
+      ? 'Painel do professor'
+      : 'Questões para responder';
   }
 }
 
@@ -242,16 +251,77 @@ function renderQuestionList() {
   });
 }
 
+function renderProfessorQuestionList() {
+  listaQuestoesProfessor.replaceChildren();
+  if (questions.length === 0) {
+    listaQuestoesProfessor.textContent = 'Nenhuma questão cadastrada.';
+    return;
+  }
+
+  questions.forEach((question) => {
+    const item = document.createElement('article');
+    item.className = 'management-question-item';
+
+    const heading = document.createElement('h3');
+    heading.textContent = question.titulo;
+    const statement = document.createElement('p');
+    statement.textContent = question.enunciado;
+
+    item.append(heading, statement);
+    listaQuestoesProfessor.append(item);
+  });
+}
+
 async function carregarQuestoes() {
   listaQuestoes.textContent = 'Carregando questões...';
+  listaQuestoesProfessor.textContent = 'Carregando questões...';
   try {
     const response = await fetch(`${apiUrl}/questoes`);
     if (!response.ok) throw new Error('Não foi possível carregar as questões.');
     questions = await response.json();
     renderQuestionList();
+    renderProfessorQuestionList();
   } catch (error) {
     listaQuestoes.textContent = 'Não foi possível carregar as questões.';
+    listaQuestoesProfessor.textContent = 'Não foi possível carregar as questões.';
     console.error('Erro ao carregar as questões:', error);
+  }
+}
+
+async function carregarAlunos() {
+  if (!currentUser || currentUser.tipo_usuario !== 'professor') return;
+
+  listaAlunos.textContent = 'Carregando alunos...';
+  try {
+    const response = await fetch(`${apiUrl}/usuarios/alunos`, {
+      headers: getAuthHeaders()
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(
+        getApiErrorMessage(result.detail, 'Não foi possível carregar os alunos.')
+      );
+    }
+
+    listaAlunos.replaceChildren();
+    if (result.length === 0) {
+      listaAlunos.textContent = 'Nenhum aluno cadastrado.';
+      return;
+    }
+
+    result.forEach((student) => {
+      const item = document.createElement('article');
+      item.className = 'student-item';
+      const name = document.createElement('strong');
+      name.textContent = student.nome;
+      const email = document.createElement('span');
+      email.textContent = student.email;
+      item.append(name, email);
+      listaAlunos.append(item);
+    });
+  } catch (error) {
+    listaAlunos.textContent = `Não foi possível carregar os alunos: ${error.message}`;
+    console.error('Erro ao carregar alunos:', error);
   }
 }
 
@@ -320,6 +390,7 @@ function showStatistics() {
     showWelcome();
     return;
   }
+  if (currentUser.tipo_usuario !== 'estudante') return;
 
   const nome = currentUser.nome;
   saveCurrentQuestionState();
@@ -375,7 +446,7 @@ async function carregarEstatisticas(nome) {
 
 function showQuestion(questionId) {
   document.body.classList.remove('auth-screen');
-  if (!currentUser) return;
+  if (!currentUser || currentUser.tipo_usuario !== 'estudante') return;
   saveCurrentQuestionState();
   const question = questions.find((item) => item.id_questao === questionId);
 
@@ -424,6 +495,12 @@ inicioBtn.addEventListener('click', () => {
   else showWelcome();
 });
 estatisticasBtn.addEventListener('click', showStatistics);
+questoesCadastradasDetails.addEventListener('toggle', () => {
+  if (questoesCadastradasDetails.open) carregarQuestoes();
+});
+alunosCadastradosDetails.addEventListener('toggle', () => {
+  if (alunosCadastradosDetails.open) carregarAlunos();
+});
 novaQuestaoBtn.addEventListener('click', () => {
   if (!currentUser || currentUser.tipo_usuario !== 'professor') return;
   document.body.classList.remove('auth-screen');
@@ -538,7 +615,12 @@ async function salvarNovaQuestao(event) {
 
 
 async function enviaFastAPI() {
-  if (!workspace || !currentQuestionId || !currentUser) return;
+  if (
+    !workspace ||
+    !currentQuestionId ||
+    !currentUser ||
+    currentUser.tipo_usuario !== 'estudante'
+  ) return;
 
   const nome = currentUser.nome;
   const code = Blockly.Python.workspaceToCode(workspace);

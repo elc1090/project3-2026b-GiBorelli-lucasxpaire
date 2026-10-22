@@ -338,3 +338,19 @@ async def login_user(data: UsuarioLogin, db: Session = Depends(get_db)):
 @app.get("/auth/me", response_model=UsuarioResponse)
 async def get_my_profile(current_user: Usuario = Depends(get_current_user)):
     return current_user
+
+
+@app.get("/usuarios/alunos")
+async def list_students(
+    db: Session = Depends(get_db),
+    _: Usuario = Depends(require_professor),
+):
+    students = db.scalars(
+        select(Usuario)
+        .where(Usuario.tipo_usuario == "estudante")
+        .order_by(Usuario.nome, Usuario.email)
+    ).all()
+    return [
+        {"nome": student.nome, "email": student.email}
+        for student in students
+    ]
