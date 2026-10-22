@@ -1,9 +1,9 @@
 # Projeto: Aplicação com cadastro e autenticação de usuários integrando frontend, backend e persistência
 
-![GIF](./GIF.gif "GIF animado do projeto.")
+![GIF](GIF.gif "GIF do projeto.")
 
 ## Acesso
-Acesso ao app: [conectablocos.vercel.app](conectablocos.vercel.app)
+Acesso ao app: [conectablocos.vercel.app](https://conectablocos.vercel.app)
 
 Como o deploy do backend está no Render, é possível que haja algum atraso na resposta se ele estiver "adormecido". Para resolver isso, é só esperar ou acessá-lo em: [deploy backend](https://conecta-blocos-backend.onrender.com).
 
